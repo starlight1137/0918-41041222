@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+        .choices button {
+            margin: 10px;
+            padding: 10px;
+            border: 3px double black; /* 雙邊框且粗細為 3px */
+            background: none; /* 去除背景 */
+            cursor: pointer; /* 鼠標變為手形 */
+        }
+        .choices img {
+            width: 100px; /* 圖片大小 */
+            height: 100px; /* 統一按鈕高度 */
+        }
+        .win { color: green; }
+        .lose { color: red; }
+        .result-container {
+            font-size: 25px;
+            border: 2px solid black;
+            padding: 10px;
+            margin: 20px auto;
+            display: inline-block;
+            background-color: antiquewhite; /* 外框背景顏色 */
+        }
+    </style>
+</head>
+<body>
+    <h1>Rock, Paper, Sissor</h1>
+    <h3>Made By 41041222 :)</h3>
+    <div class="choices">
+        <button onclick="play('剪刀')">
+            <img src="https://paperplusuk.com/wp-content/uploads/2021/10/RSLH.jpg" alt="剪刀">
+        </button>
+        <button onclick="play('石頭')">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Dwayne_%22The_Rock%22_Johnson_Visits_the_Pentagon_%2841%29_%28cropped%29.jpg/800px-Dwayne_%22The_Rock%22_Johnson_Visits_the_Pentagon_%2841%29_%28cropped%29.jpg" alt="石頭">
+        </button>
+        <button onclick="play('布')">
+            <img src="https://us.whogivesacrap.org/cdn/shop/files/2-REC48-US_1120x1120.jpg?v=1707326996" alt="布">
+        </button>
+    </div>
+    <h2>結果紀錄</h2>
+    <div class="result-container">
+        <ul id="resultList"></ul>
+    </div>
+    <h3 id="status"></h3>
+    
+    <script>
+        let playerScore = 0;
+        let computerScore = 0;
+        const winCondition = 3; // 先贏三次
+
+        function play(playerChoice) {
+            if (playerScore >= winCondition || computerScore >= winCondition) {
+                // 如果比賽已經結束，則不再執行
+                return;
+            }
+
+            const choices = ['剪刀', '石頭', '布'];
+            const computerChoice = choices[Math.floor(Math.random() * 3)];
+            let result;
+
+            if (playerChoice === computerChoice) {
+                result = '平手！';
+            } else if (
+                (playerChoice === '剪刀' && computerChoice === '布') ||
+                (playerChoice === '石頭' && computerChoice === '剪刀') ||
+                (playerChoice === '布' && computerChoice === '石頭')
+            ) {
+                result = '你贏了！';
+                playerScore++;
+                result = `<span class="win">${result}</span>`;
+            } else {
+                result = '你輸了！';
+                computerScore++;
+                result = `<span class="lose">${result}</span>`;
+            }
+
+            recordResult(playerChoice, computerChoice, result);
+            updateStatus();
+
+            if (playerScore === winCondition) {
+                endGame("你贏得了比賽！");
+            } else if (computerScore === winCondition) {
+                endGame("電腦贏得了比賽！");
+            }
+        }
+
+        function recordResult(playerChoice, computerChoice, result) {
+            const resultList = document.getElementById('resultList');
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `你: ${playerChoice}, 電腦: ${computerChoice} - ${result}`;
+            resultList.appendChild(listItem);
+        }
+
+        function updateStatus() {
+            const status = document.getElementById('status');
+            status.textContent = `你: ${playerScore}, 電腦: ${computerScore}`;
+        }
+
+        function endGame(message) {
+            const status = document.getElementById('status');
+            status.textContent += " " + message;
+
+            // 使用 SweetAlert2 彈出視窗詢問是否重新開始
+            Swal.fire({
+                title: '遊戲結束!',
+                text: message,
+                icon: 'info',
+                showCancelButton: true,
+                confirmButtonText: '重新開始',
+                cancelButtonText: '退出'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    resetGame();
+                }
+            });
+        }
+
+        function resetGame() {
+            playerScore = 0; 
+            computerScore = 0; 
+            document.getElementById('resultList').innerHTML = ''; // 清空結果紀錄
+            updateStatus(); // 更新狀態
+        }
+    </script>
+</body>
+</html>
