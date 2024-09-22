@@ -14,13 +14,17 @@
         .choices button {
             margin: 10px;
             padding: 10px;
-            border: 3px double black; /* 雙邊框且粗細為 3px */
-            background: none; /* 去除背景 */
-            cursor: pointer; /* 鼠標變為手形 */
+            border: 3px double black; 
+            background: none;
+            cursor: pointer;
+            transition: transform 0.3s ease; /* 動畫過渡效果 */
+        }
+        .choices button:hover {
+            transform: scale(1.2); /* 當鼠標懸停時，按鈕放大 */
         }
         .choices img {
-            width: 100px; /* 圖片大小 */
-            height: 100px; /* 統一按鈕高度 */
+            width: 100px;
+            height: 100px;
         }
         .win { color: green; }
         .lose { color: red; }
@@ -30,21 +34,21 @@
             padding: 10px;
             margin: 20px auto;
             display: inline-block;
-            background-color: antiquewhite; /* 外框背景顏色 */
+            background-color: antiquewhite;
         }
     </style>
 </head>
 <body>
-    <h1>Rock, Paper, Sissor</h1>
+    <h1>Rock, Paper, Scissor</h1>
     <h3>Made By 41041222 :)</h3>
     <div class="choices">
-        <button onclick="play('剪刀')">
+        <button onclick="play('剪刀')" title="剪刀"> <!-- 加入 title 作為提示 -->
             <img src="https://paperplusuk.com/wp-content/uploads/2021/10/RSLH.jpg" alt="剪刀">
         </button>
-        <button onclick="play('石頭')">
+        <button onclick="play('石頭')" title="石頭"> <!-- 加入 title 作為提示 -->
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/1/11/Dwayne_%22The_Rock%22_Johnson_Visits_the_Pentagon_%2841%29_%28cropped%29.jpg/800px-Dwayne_%22The_Rock%22_Johnson_Visits_the_Pentagon_%2841%29_%28cropped%29.jpg" alt="石頭">
         </button>
-        <button onclick="play('布')">
+        <button onclick="play('布')" title="布"> <!-- 加入 title 作為提示 -->
             <img src="https://us.whogivesacrap.org/cdn/shop/files/2-REC48-US_1120x1120.jpg?v=1707326996" alt="布">
         </button>
     </div>
@@ -54,14 +58,18 @@
     </div>
     <h3 id="status"></h3>
     
+    <!-- 添加音樂 -->
+    <audio id="winAudio" src="win.mp3"></audio>
+    <audio id="loseAudio" src="lose.mp3"></audio>
+    <audio id="drawAudio" src="draw.mp3"></audio>
+
     <script>
         let playerScore = 0;
         let computerScore = 0;
-        const winCondition = 3; // 先贏三次
+        const winCondition = 3;
 
         function play(playerChoice) {
             if (playerScore >= winCondition || computerScore >= winCondition) {
-                // 如果比賽已經結束，則不再執行
                 return;
             }
 
@@ -88,10 +96,13 @@
             recordResult(playerChoice, computerChoice, result);
             updateStatus();
 
-            if (playerScore === winCondition) {
-                endGame("你贏得了比賽！");
+            // 平手判定
+            if (playerScore === winCondition && computerScore === winCondition) {
+                endGame("比賽結果：平手！", 'draw');
+            } else if (playerScore === winCondition) {
+                endGame("你贏得了比賽！", 'win');
             } else if (computerScore === winCondition) {
-                endGame("電腦贏得了比賽！");
+                endGame("電腦贏得了比賽！", 'lose');
             }
         }
 
@@ -107,18 +118,32 @@
             status.textContent = `你: ${playerScore}, 電腦: ${computerScore}`;
         }
 
-        function endGame(message) {
+        function endGame(message, result) {
             const status = document.getElementById('status');
             status.textContent += " " + message;
 
-            // 使用 SweetAlert2 彈出視窗詢問是否重新開始
+            // 播放相應的音樂
+            if (result === 'win') {
+                document.getElementById('winAudio').play();
+            } else if (result === 'lose') {
+                document.getElementById('loseAudio').play();
+            } else {
+                document.getElementById('drawAudio').play();
+            }
+
+            // SweetAlert 彈出視窗，用綠色顯示贏家
+            let colorMessage = message;
+            if (result === 'win') {
+                colorMessage = `<span style="color:green;">你贏得了比賽！</span>`;
+            } else if (result === 'lose') {
+                colorMessage = `<span style="color:green;">電腦贏得了比賽！</span>`;
+            }
+
             Swal.fire({
                 title: '遊戲結束!',
-                text: message,
+                html: colorMessage,
                 icon: 'info',
-                showCancelButton: true,
-                confirmButtonText: '重新開始',
-                cancelButtonText: '退出'
+                confirmButtonText: '重新開始'
             }).then((result) => {
                 if (result.isConfirmed) {
                     resetGame();
@@ -129,8 +154,8 @@
         function resetGame() {
             playerScore = 0; 
             computerScore = 0; 
-            document.getElementById('resultList').innerHTML = ''; // 清空結果紀錄
-            updateStatus(); // 更新狀態
+            document.getElementById('resultList').innerHTML = '';
+            updateStatus();
         }
     </script>
 </body>
